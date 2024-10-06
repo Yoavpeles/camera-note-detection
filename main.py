@@ -1,15 +1,13 @@
 import cv2
 import numpy as np
+import constants as con
 
 # Specify the camera index (usually 0 for built-in webcam)
 CAMERA_INDEX = 1
 # Define lower and upper bounds for orange color in RGB
-LOWER_ORANGE_RGB = np.array([191, 54, 0])  # Adjust this range as needed
-UPPER_ORANGE_RGB = np.array([255, 185, 108])  # Adjust this range as needed
-# The minimum contour area to detect a note
-MINIMUM_CONTOUR_AREA = 400
-# The threshold for a contour to be considered a disk
-CONTOUR_DISK_THRESHOLD = 0.5
+LOWER_ORANGE_RGB_ARRAY = np.array(con.LOWER_ORANGE_RGB_VALS)  # Adjust this range as needed
+UPPER_ORANGE_RGB_ARRAY = np.array(con.LOWER_ORANGE_RGB_VALS)  # Adjust this range as needed
+
 
 def find_largest_orange_contour(rgb_image: np.ndarray) -> np.ndarray:
     """
@@ -18,7 +16,7 @@ def find_largest_orange_contour(rgb_image: np.ndarray) -> np.ndarray:
     :return: the largest orange contour
     """
     # Threshold the RGB image to get only orange colors
-    mask = cv2.inRange(rgb_image, LOWER_ORANGE_RGB, UPPER_ORANGE_RGB)
+    mask = cv2.inRange(rgb_image, LOWER_ORANGE_RGB_ARRAY, UPPER_ORANGE_RGB_ARRAY)
     # Find contours in the mask
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -32,7 +30,7 @@ def contour_is_note(contour: np.ndarray) -> bool:
     :return: True if the contour is shaped like a note
     """
     # Makes sure the contour isn't some random small spec of noise
-    if cv2.contourArea(contour) < MINIMUM_CONTOUR_AREA:
+    if cv2.contourArea(contour) < con.MINIMUM_CONTOUR_AREA:
         return False
 
     perimeter = cv2.arcLength(contour, True)
@@ -47,7 +45,7 @@ def contour_is_note(contour: np.ndarray) -> bool:
     ellipse = cv2.fitEllipse(contour_hull)
     best_fit_ellipse_area = np.pi * (ellipse[1][0] / 2) * (ellipse[1][1] / 2)
     # Returns True if the hull is almost as big as the ellipse
-    return cv2.contourArea(contour_hull) / best_fit_ellipse_area > CONTOUR_DISK_THRESHOLD
+    return cv2.contourArea(contour_hull) / best_fit_ellipse_area > con.CONTOUR_DISK_THRESHOLD
 
 def main():
     # Open the camera
