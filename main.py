@@ -4,8 +4,8 @@ import numpy as np
 # Specify the camera index (usually 0 for built-in webcam)
 CAMERA_INDEX = 1
 # Define lower and upper bounds for orange color in RGB
-LOWER_ORANGE_RGB = np.array([191, 54, 0])  # Adjust this range as needed
-UPPER_ORANGE_RGB = np.array([255, 185, 108])  # Adjust this range as needed
+LOWER_ORANGE_RGB = np.array([0, 54, 191])  # Adjust this range as needed
+UPPER_ORANGE_RGB = np.array([108, 185, 255])  # Adjust this range as needed
 # The minimum contour area to detect a note
 MINIMUM_CONTOUR_AREA = 400
 # The threshold for a contour to be considered a disk
@@ -35,11 +35,11 @@ def contour_is_note(contour: np.ndarray) -> bool:
     if cv2.contourArea(contour) < MINIMUM_CONTOUR_AREA:
         return False
 
-    perimeter = cv2.arcLength(contour, True)
-    area = cv2.contourArea(contour)
-    circularity = 4 * np.pi * (area / (perimeter * perimeter))
-    if circularity < 0.1:  # Adjust the threshold as needed
-        return False
+    # perimeter = cv2.arcLength(contour, True)
+    # area = cv2.contourArea(contour)
+    # circularity = 4 * np.pi * (area / (perimeter * perimeter))
+    # if circularity < 0.1:  # Adjust the threshold as needed
+    #     return False
 
     # Gets the smallest convex polygon that can fit around the contour
     contour_hull = cv2.convexHull(contour)
@@ -79,6 +79,19 @@ def main():
             # Draw the center for the ellipse
             center = (int(ellipse[0][0]), int(ellipse[0][1]))  # Ellipse center
             cv2.circle(frame, center, 1, (0, 0, 255), 2)  # Draw center in red
+
+        mask = cv2.inRange(frame, LOWER_ORANGE_RGB, UPPER_ORANGE_RGB)
+
+        # Find contours in the mask
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        # Find the largest contour (clump) of specified color pixels
+        if contours:
+            # Draws all detected contours in green
+            cv2.drawContours(frame, contours, -1, [0, 255, 0], 1)
+            # Gets the largest contour and draws it in blue
+            largest_contour = max(contours, key=cv2.contourArea)
+            cv2.drawContours(frame, [largest_contour], 0, [255, 0, 0], 2)
 
         cv2.imshow("Frame", frame)
 
