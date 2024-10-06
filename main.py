@@ -76,9 +76,9 @@ def main():
 
             cv2.drawContours(frame, contour, 0, (255, 255, 255), 10)
 
-            # Draw the circle around the ellipse
+            # Draw the center for the ellipse
             center = (int(ellipse[0][0]), int(ellipse[0][1]))  # Ellipse center
-            cv2.circle(frame, center, 1, (0, 0, 255), 2)  # Draw circle in red
+            cv2.circle(frame, center, 1, (0, 0, 255), 2)  # Draw center in red
 
         cv2.imshow("Frame", frame)
 
